@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ARENA — Event Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#080C10;
+--bg2:#0D1318;
+--bg3:#111820;
+--accent:#00FF87;
+--accent-dim:rgba(0,255,135,0.12);
+--accent-glow:rgba(0,255,135,0.35);
+--gold:#FFD700;
+--silver:#C0C0C0;
+--bronze:#CD7F32;
+--text:#F0F4F8;
+--muted:#6B7280;
+--border:rgba(255,255,255,0.07);
+--font-hero:'Bebas Neue',sans-serif;
+--font-body:'Space Grotesk',sans-serif;
+--font-mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{
+background:var(--bg);
+color:var(--text);
+font-family:var(--font-body);
+min-height:100vh;
+overflow-x:hidden;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
+
+/* ── HERO ── */
+#hero{
+position:relative;
+height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+overflow:hidden;
+}
+.hero-bg-text{
+position:absolute;
+font-family:var(--font-hero);
+font-size:clamp(80px,18vw,220px);
+color:rgba(0,255,135,0.04);
+letter-spacing:0.05em;
+user-select:none;
+pointer-events:none;
+white-space:nowrap;
+animation:float 8s ease-in-out infinite;
+}
+.hero-bg-text.t1{top:5%;left:-2%}
+.hero-bg-text.t2{bottom:8%;right:-3%;font-size:clamp(60px,12vw,160px);color:rgba(0,255,135,0.025);animation-delay:-4s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+
+.grid-overlay{
+position:absolute;inset:0;
+background-image:
+linear-gradient(rgba(0,255,135,0.03) 1px,transparent 1px),
+linear-gradient(90deg,rgba(0,255,135,0.03) 1px,transparent 1px);
+background-size:60px 60px;
+pointer-events:none;
+}
+.scan-line{
+position:absolute;
+top:0;left:0;right:0;
+height:2px;
+background:linear-gradient(90deg,transparent,var(--accent),transparent);
+animation:scan 6s linear infinite;
+opacity:0.4;
+}
+@keyframes scan{from{top:-2px}to{top:100%}}
+
+.hero-badge{
+font-family:var(--font-mono);
+font-size:11px;
+letter-spacing:0.3em;
+color:var(--accent);
+text-transform:uppercase;
+border:1px solid rgba(0,255,135,0.3);
+padding:6px 18px;
+border-radius:2px;
+margin-bottom:24px;
+animation:fadeUp 0.8s ease both;
+}
+.hero-title{
+font-family:var(--font-hero);
+font-size:clamp(56px,10vw,130px);
+line-height:0.9;
+text-align:center;
+letter-spacing:0.02em;
+animation:fadeUp 0.8s 0.15s ease both;
+}
+.hero-title span{color:var(--accent);text-shadow:0 0 40px var(--accent-glow)}
+.hero-sub{
+font-size:clamp(13px,1.5vw,15px);
+color:var(--muted);
+letter-spacing:0.15em;
+text-transform:uppercase;
+margin-top:16px;
+animation:fadeUp 0.8s 0.3s ease both;
+}
+.hero-cta{
+margin-top:48px;
+animation:fadeUp 0.8s 0.45s ease both;
+display:flex;gap:16px;flex-wrap:wrap;justify-content:center;
+}
+.btn-primary{
+font-family:var(--font-mono);
+font-size:13px;
+letter-spacing:0.2em;
+text-transform:uppercase;
+padding:14px 36px;
+border:1.5px solid var(--accent);
+background:var(--accent-dim);
+color:var(--accent);
+text-decoration:none;
+cursor:pointer;
+border-radius:4px;
+transition:all 0.3s ease;
+box-shadow:0 0 20px rgba(0,255,135,0.15);
+}
+.btn-primary:hover{
+background:var(--accent);
+color:#000;
+box-shadow:0 0 40px var(--accent-glow);
+transform:translateY(-2px);
+}
+.btn-ghost{
+font-family:var(--font-mono);
+font-size:13px;
+letter-spacing:0.2em;
+text-transform:uppercase;
+padding:14px 36px;
+border:1px solid rgba(255,255,255,0.12);
+background:transparent;
+color:var(--muted);
+cursor:pointer;
+border-radius:4px;
+transition:all 0.3s ease;
+}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.3);color:var(--text)}
+
+.hero-scroll{
+position:absolute;bottom:32px;left:50%;
+transform:translateX(-50%);
+display:flex;flex-direction:column;align-items:center;gap:8px;
+animation:fadeUp 1s 0.8s ease both;
+}
+.hero-scroll span{font-family:var(--font-mono);font-size:10px;letter-spacing:0.3em;color:var(--muted)}
+.scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,var(--accent),transparent);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+@keyframes fadeUp{
+from{opacity:0;transform:translateY(24px)}
+to{opacity:1;transform:translateY(0)}
+}
+
+/* ── NAV ── */
+nav{
+position:fixed;top:0;left:0;right:0;z-index:100;
+display:flex;align-items:center;justify-content:space-between;
+padding:18px 40px;
+background:rgba(8,12,16,0.7);
+backdrop-filter:blur(20px);
+border-bottom:1px solid var(--border);
+transition:all 0.3s;
+}
+.nav-logo{
+font-family:var(--font-hero);
+font-size:28px;
+letter-spacing:0.1em;
+color:var(--accent);
+text-shadow:0 0 20px var(--accent-glow);
+}
+.nav-links{display:flex;gap:32px}
+.nav-links a{
+font-family:var(--font-mono);
+font-size:11px;
+letter-spacing:0.2em;
+color:var(--muted);
+text-decoration:none;
+text-transform:uppercase;
+transition:color 0.2s;
+}
+.nav-links a:hover{color:var(--accent)}
+.nav-admin-btn{
+font-family:var(--font-mono);
+font-size:11px;
+letter-spacing:0.15em;
+padding:8px 16px;
+border:1px solid rgba(255,255,255,0.1);
+background:transparent;
+color:var(--muted);
+cursor:pointer;
+border-radius:3px;
+transition:all 0.2s;
+display:flex;align-items:center;gap:8px;
+}
+.nav-admin-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── SECTION BASE ── */
+section{padding:100px 40px;max-width:1200px;margin:0 auto}
+.section-label{
+font-family:var(--font-mono);
+font-size:11px;
+letter-spacing:0.4em;
+color:var(--accent);
+text-transform:uppercase;
+margin-bottom:12px;
+}
+.section-title{
+font-family:var(--font-hero);
+font-size:clamp(40px,6vw,72px);
+letter-spacing:0.03em;
+line-height:1;
+}
+
+/* ── EVENT SWITCHER ── */
+#events{padding-top:60px}
+.switcher-wrap{
+display:flex;
+gap:4px;
+background:rgba(255,255,255,0.03);
+border:1px solid var(--border);
+border-radius:8px;
+padding:4px;
+width:fit-content;
+margin:32px 0 60px;
+}
+.switcher-tab{
+font-family:var(--font-mono);
+font-size:12px;
+letter-spacing:0.2em;
+text-transform:uppercase;
+padding:12px 32px;
+border-radius:6px;
+border:none;
+background:transparent;
+color:var(--muted);
+cursor:pointer;
+transition:all 0.35s ease;
+position:relative;
+}
+.switcher-tab.active{
+background:var(--accent-dim);
+color:var(--accent);
+border:1px solid rgba(0,255,135,0.3);
+box-shadow:0 0 20px rgba(0,255,135,0.1);
+}
+
+/* ── PODIUM ── */
+.podium-section{
+position:relative;
+overflow:hidden;
+padding:120px 40px 80px;
+}
+.podium-bg{
+position:absolute;inset:0;
+background:radial-gradient(ellipse 60% 60% at 50% 80%,rgba(0,255,135,0.04) 0%,transparent 70%);
+pointer-events:none;
+}
+.podium-bg-text{
+position:absolute;
+font-family:var(--font-hero);
+font-size:clamp(100px,20vw,260px);
+color:rgba(255,255,255,0.015);
+bottom:-20px;left:50%;
+transform:translateX(-50%);
+white-space:nowrap;
+letter-spacing:0.05em;
+pointer-events:none;
+}
+.podium-inner{max-width:1200px;margin:0 auto}
+.podium-header{text-align:center;margin-bottom:72px}
+.podium-stage{
+display:flex;
+align-items:flex-end;
+justify-content:center;
+gap:24px;
+}
+.podium-card{
+position:relative;
+display:flex;
+flex-direction:column;
+align-items:center;
+transition:transform 0.6s ease,opacity 0.6s ease;
+}
+.podium-card.rank-1{z-index:3;transform:translateY(0)}
+.podium-card.rank-2{transform:translateY(40px)}
+.podium-card.rank-3{transform:translateY(60px)}
+
+.podium-avatar{
+width:80px;height:80px;
+border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+font-family:var(--font-hero);
+font-size:28px;
+position:relative;
+margin-bottom:16px;
+animation:podFloat 4s ease-in-out infinite;
+}
+.podium-card.rank-1 .podium-avatar{
+width:100px;height:100px;font-size:36px;
+background:radial-gradient(circle,rgba(255,215,0,0.2),rgba(255,215,0,0.05));
+border:2px solid var(--gold);
+box-shadow:0 0 40px rgba(255,215,0,0.3),0 0 80px rgba(255,215,0,0.1);
+animation-delay:0s;
+}
+.podium-card.rank-2 .podium-avatar{
+background:radial-gradient(circle,rgba(192,192,192,0.2),rgba(192,192,192,0.05));
+border:2px solid var(--silver);
+box-shadow:0 0 30px rgba(192,192,192,0.2);
+animation-delay:-1.5s;
+}
+.podium-card.rank-3 .podium-avatar{
+background:radial-gradient(circle,rgba(205,127,50,0.2),rgba(205,127,50,0.05));
+border:2px solid var(--bronze);
+box-shadow:0 0 30px rgba(205,127,50,0.2);
+animation-delay:-3s;
+}
+@keyframes podFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+.podium-rank-badge{
+position:absolute;
+top:-10px;right:-10px;
+width:28px;height:28px;
+border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+font-family:var(--font-mono);
+font-size:11px;
+font-weight:700;
+}
+.rank-1 .podium-rank-badge{background:var(--gold);color:#000}
+.rank-2 .podium-rank-badge{background:var(--silver);color:#000}
+.rank-3 .podium-rank-badge{background:var(--bronze);color:#000}
+
+.podium-name{
+font-family:var(--font-hero);
+letter-spacing:0.05em;
+text-align:center;
+margin-bottom:4px;
+}
+.rank-1 .podium-name{font-size:28px}
+.rank-2 .podium-name,.rank-3 .podium-name{font-size:22px}
+
+.podium-score{
+font-family:var(--font-mono);
+font-size:13px;
+color:var(--muted);
+margin-bottom:20px;
+}
+.rank-1 .podium-score{color:var(--accent);font-size:15px}
+
+.podium-plinth{
+border-radius:6px 6px 0 0;
+display:flex;align-items:center;justify-content:center;
+font-family:var(--font-hero);
+letter-spacing:0.1em;
+}
+.rank-1 .podium-plinth{
+width:180px;height:120px;
+background:linear-gradient(to top,rgba(255,215,0,0.15),rgba(255,215,0,0.05));
+border:1px solid rgba(255,215,0,0.25);
+font-size:48px;color:var(--gold);
+}
+.rank-2 .podium-plinth{
+width:150px;height:80px;
+background:linear-gradient(to top,rgba(192,192,192,0.1),rgba(192,192,192,0.03));
+border:1px solid rgba(192,192,192,0.2);
+font-size:40px;color:var(--silver);
+}
+.rank-3 .podium-plinth{
+width:140px;height:60px;
+background:linear-gradient(to top,rgba(205,127,50,0.1),rgba(205,127,50,0.03));
+border:1px solid rgba(205,127,50,0.2);
+font-size:36px;color:var(--bronze);
+}
+
+/* ── LEADERBOARD ── */
+#leaderboard-section{max-width:1200px;margin:0 auto;padding:80px 40px}
+.lb-header{
+display:flex;
+align-items:flex-end;
+justify-content:space-between;
+margin-bottom:40px;
+flex-wrap:wrap;gap:24px;
+}
+.search-bar-wrap{
+position:relative;
+}
+.search-bar{
+font-family:var(--font-mono);
+font-size:13px;
+letter-spacing:0.1em;
+padding:12px 20px 12px 44px;
+background:rgba(255,255,255,0.03);
+border:1px solid var(--border);
+border-radius:6px;
+color:var(--text);
+width:280px;
+transition:all 0.3s;
+outline:none;
+}
+.search-bar:focus{border-color:rgba(0,255,135,0.4);background:rgba(0,255,135,0.03)}
+.search-icon{
+position:absolute;left:14px;top:50%;transform:translateY(-50%);
+color:var(--muted);font-size:15px;pointer-events:none;
+}
+.lb-list{display:flex;flex-direction:column;gap:10px}
+.lb-row{
+display:flex;
+align-items:center;
+gap:20px;
+padding:18px 24px;
+background:rgba(255,255,255,0.02);
+border:1px solid var(--border);
+border-radius:10px;
+cursor:pointer;
+transition:all 0.3s ease;
+position:relative;
+overflow:hidden;
+}
+.lb-row::before{
+content:'';
+position:absolute;
+left:0;top:0;bottom:0;
+width:3px;
+background:var(--accent);
+opacity:0;
+transition:opacity 0.3s;
+}
+.lb-row:hover{
+background:rgba(0,255,135,0.04);
+border-color:rgba(0,255,135,0.2);
+transform:translateX(4px);
+box-shadow:0 0 30px rgba(0,255,135,0.06);
+}
+.lb-row:hover::before{opacity:1}
+.lb-row.highlight{
+background:rgba(0,255,135,0.06);
+border-color:rgba(0,255,135,0.3);
+}
+.lb-row.top3{border-left:none}
+.lb-rank-num{
+font-family:var(--font-hero);
+font-size:36px;
+letter-spacing:0.02em;
+min-width:60px;
+color:rgba(255,255,255,0.15);
+line-height:1;
+}
+.lb-row:nth-child(1) .lb-rank-num{color:var(--gold)}
+.lb-row:nth-child(2) .lb-rank-num{color:var(--silver)}
+.lb-row:nth-child(3) .lb-rank-num{color:var(--bronze)}
+.lb-avatar{
+width:40px;height:40px;border-radius:50%;
+background:rgba(0,255,135,0.08);
+border:1px solid rgba(0,255,135,0.2);
+display:flex;align-items:center;justify-content:center;
+font-family:var(--font-hero);
+font-size:16px;
+flex-shrink:0;
+}
+.lb-info{flex:1;min-width:0}
+.lb-name{
+font-size:15px;
+font-weight:500;
+letter-spacing:0.02em;
+}
+.lb-meta{
+font-family:var(--font-mono);
+font-size:11px;
+color:var(--muted);
+letter-spacing:0.1em;
+margin-top:3px;
+}
+.lb-score{
+font-family:var(--font-mono);
+font-size:20px;
+font-weight:700;
+color:var(--accent);
+min-width:80px;
+text-align:right;
+}
+.lb-score-label{
+font-family:var(--font-mono);
+font-size:10px;
+color:var(--muted);
+text-align:right;
+letter-spacing:0.15em;
+}
+.lb-bar-wrap{
+width:100px;
+height:3px;
+background:rgba(255,255,255,0.06);
+border-radius:2px;
+overflow:hidden;
+}
+.lb-bar{
+height:100%;
+background:linear-gradient(90deg,var(--accent),rgba(0,255,135,0.4));
+border-radius:2px;
+transition:width 0.8s ease;
+}
+
+/* ── ADMIN ── */
+#admin-panel{
+position:fixed;
+bottom:24px;right:24px;
+z-index:200;
+}
+.admin-toggle{
+width:48px;height:48px;
+border-radius:50%;
+background:rgba(8,12,16,0.9);
+border:1px solid var(--border);
+color:var(--muted);
+cursor:pointer;
+font-size:18px;
+display:flex;align-items:center;justify-content:center;
+transition:all 0.3s;
+backdrop-filter:blur(10px);
+}
+.admin-toggle:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 20px rgba(0,255,135,0.2)}
+.admin-drawer{
+position:absolute;
+bottom:60px;right:0;
+width:300px;
+background:rgba(13,19,24,0.95);
+border:1px solid rgba(0,255,135,0.2);
+border-radius:12px;
+padding:24px;
+backdrop-filter:blur(20px);
+box-shadow:0 0 60px rgba(0,0,0,0.5);
+display:none;
+}
+.admin-drawer.open{display:block;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.admin-title{
+font-family:var(--font-mono);
+font-size:10px;
+letter-spacing:0.3em;
+color:var(--accent);
+text-transform:uppercase;
+margin-bottom:20px;
+}
+.admin-row{
+display:flex;align-items:center;gap:12px;
+margin-bottom:16px;
+}
+.admin-select-name{
+flex:1;
+font-family:var(--font-mono);
+font-size:12px;
+padding:8px 12px;
+background:rgba(255,255,255,0.04);
+border:1px solid var(--border);
+border-radius:6px;
+color:var(--text);
+outline:none;
+}
+.admin-select-name option{background:#0D1318}
+.admin-score-controls{display:flex;gap:8px}
+.admin-btn{
+width:36px;height:36px;
+border-radius:6px;
+border:1px solid var(--border);
+background:rgba(255,255,255,0.04);
+color:var(--text);
+cursor:pointer;
+font-size:18px;
+display:flex;align-items:center;justify-content:center;
+transition:all 0.2s;
+font-family:var(--font-mono);
+}
+.admin-btn.plus:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,255,135,0.08)}
+.admin-btn.minus:hover{border-color:#ff4444;color:#ff4444;background:rgba(255,68,68,0.08)}
+.admin-score-val{
+font-family:var(--font-mono);
+font-size:14px;
+min-width:40px;
+text-align:center;
+color:var(--accent);
+}
+.admin-event-switch{
+margin-top:16px;
+padding-top:16px;
+border-top:1px solid var(--border);
+}
+.admin-event-title{
+font-family:var(--font-mono);
+font-size:10px;
+letter-spacing:0.2em;
+color:var(--muted);
+text-transform:uppercase;
+margin-bottom:10px;
+}
+.admin-event-btns{display:flex;gap:8px}
+.admin-event-btn{
+flex:1;
+font-family:var(--font-mono);
+font-size:11px;
+letter-spacing:0.1em;
+padding:8px;
+border-radius:6px;
+border:1px solid var(--border);
+background:transparent;
+color:var(--muted);
+cursor:pointer;
+transition:all 0.2s;
+}
+.admin-event-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+
+/* ── FOOTER ── */
+footer{
+text-align:center;
+padding:40px;
+font-family:var(--font-mono);
+font-size:11px;
+color:rgba(255,255,255,0.15);
+letter-spacing:0.2em;
+border-top:1px solid var(--border);
+}
+
+/* ── EMPTY STATE ── */
+.empty-state{
+text-align:center;
+padding:60px;
+color:var(--muted);
+font-family:var(--font-mono);
+font-size:13px;
+letter-spacing:0.2em;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+nav{padding:14px 20px}
+.nav-links{display:none}
+section,#leaderboard-section,#podium-section{padding:60px 20px}
+.podium-stage{flex-direction:column;align-items:center;gap:32px}
+.podium-card.rank-2,.podium-card.rank-3{transform:none}
+.rank-1 .podium-plinth,.rank-2 .podium-plinth,.rank-3 .podium-plinth{width:140px;height:60px}
+.lb-bar-wrap{display:none}
+.search-bar{width:200px}
+.lb-header{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo">ARENA</div>
+  <div class="nav-links">
+    <a href="#events">Events</a>
+    <a href="#podium-section">Podium</a>
+    <a href="#leaderboard-section">Rankings</a>
+  </div>
+  <button class="nav-admin-btn" onclick="toggleAdmin()">⚙ ADMIN</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="grid-overlay"></div>
+  <div class="scan-line"></div>
+  <div class="hero-bg-text t1">LEADERBOARD</div>
+  <div class="hero-bg-text t2">DOMINANCE</div>
+
+  <div class="hero-badge">COLLEGE TECH FEST 2025</div>
+  <h1 class="hero-title">ENTER<br/>THE <span>ARENA</span></h1>
+  <p class="hero-sub">Where rankings feel like power levels</p>
+  <div class="hero-cta">
+    <a href="#podium-section" class="btn-primary">ENTER ARENA</a>
+    <a href="#leaderboard-section" class="btn-ghost">VIEW RANKINGS</a>
+  </div>
+
+  <div class="hero-scroll">
+    <span>SCROLL</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- EVENT SWITCHER -->
+<section id="events">
+  <div class="section-label">// SELECT EVENT</div>
+  <h2 class="section-title">CHOOSE<br/>YOUR <span style="color:var(--accent)">ARENA</span></h2>
+  <div class="switcher-wrap" id="switcher">
+    <button class="switcher-tab active" onclick="switchEvent('promptverse',this)">PromptVerse</button>
+    <button class="switcher-tab" onclick="switchEvent('blindcoding',this)">Blind Coding</button>
+  </div>
+</section>
+
+<!-- PODIUM -->
+<div class="podium-section" id="podium-section">
+  <div class="podium-bg"></div>
+  <div class="podium-bg-text" id="podium-bg-text">TOP 3</div>
+  <div class="podium-inner">
+    <div style="text-align:center;margin-bottom:72px">
+      <div class="section-label">// HALL OF FAME</div>
+      <h2 class="section-title">THE <span style="color:var(--accent)">PODIUM</span></h2>
+    </div>
+    <div class="podium-stage" id="podium-stage">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboard-section">
+  <div class="lb-header">
+    <div>
+      <div class="section-label">// FULL RANKINGS</div>
+      <h2 class="section-title" style="font-size:clamp(32px,5vw,56px)">POWER<br/>RANKINGS</h2>
+    </div>
+    <div class="search-bar-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-bar" type="text" placeholder="Search combatant..." id="searchInput" oninput="filterList()"/>
+    </div>
+  </div>
+  <div class="lb-list" id="lb-list">
+    <!-- Rendered by JS -->
+  </div>
+  <div class="empty-state" id="empty-state" style="display:none">NO COMBATANTS FOUND</div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-panel">
+  <div class="admin-drawer" id="admin-drawer">
+    <div class="admin-title">⚙ ADMIN CONTROL</div>
+    <div class="admin-row">
+      <select class="admin-select-name" id="admin-select">
+        <!-- Populated by JS -->
+      </select>
+    </div>
+    <div class="admin-row" style="justify-content:space-between;align-items:center">
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:0.15em">SCORE</span>
+      <div class="admin-score-controls">
+        <button class="admin-btn minus" onclick="changeScore(-10)">−</button>
+        <span class="admin-score-val" id="admin-score-display">0</span>
+        <button class="admin-btn plus" onclick="changeScore(+10)">+</button>
+      </div>
+    </div>
+    <div class="admin-row">
+      <button class="admin-btn plus" style="width:100%;font-size:12px;letter-spacing:0.1em;font-family:var(--font-mono)" onclick="addParticipant()">+ ADD PARTICIPANT</button>
+    </div>
+    <div class="admin-event-switch">
+      <div class="admin-event-title">SWITCH EVENT</div>
+      <div class="admin-event-btns">
+        <button class="admin-event-btn active" id="ev-btn-promptverse" onclick="switchEvent('promptverse',null,true)">PromptVerse</button>
+        <button class="admin-event-btn" id="ev-btn-blindcoding" onclick="switchEvent('blindcoding',null,true)">Blind Coding</button>
+      </div>
+    </div>
+  </div>
+  <button class="admin-toggle" onclick="toggleAdmin()" title="Admin Panel">⚙</button>
+</div>
+
+<footer>ARENA &mdash; COLLEGE TECH FEST &copy; 2025 &mdash; BUILT FOR CHAMPIONS</footer>
+
+<script>
+const DEFAULT_DATA = {
+  promptverse:[
+    {id:1,name:"Aditya Sharma",initials:"AS",score:980},
+    {id:2,name:"Priya Nair",initials:"PN",score:870},
+    {id:3,name:"Rohan Mehta",initials:"RM",score:810},
+    {id:4,name:"Sneha Patel",initials:"SP",score:740},
+    {id:5,name:"Kiran Rao",initials:"KR",score:690},
+    {id:6,name:"Divya Iyer",initials:"DI",score:640},
+    {id:7,name:"Arjun Verma",initials:"AV",score:580},
+    {id:8,name:"Meera Singh",initials:"MS",score:520},
+  ],
+  blindcoding:[
+    {id:1,name:"Varun Das",initials:"VD",score:950},
+    {id:2,name:"Ananya Kumar",initials:"AK",score:900},
+    {id:3,name:"Siddharth Joshi",initials:"SJ",score:840},
+    {id:4,name:"Tanvi Bhatt",initials:"TB",score:760},
+    {id:5,name:"Ravi Pillai",initials:"RP",score:710},
+    {id:6,name:"Nisha Reddy",initials:"NR",score:660},
+    {id:7,name:"Gautam Chopra",initials:"GC",score:600},
+    {id:8,name:"Pooja Menon",initials:"PM",score:545},
+  ]
+};
+
+let state = JSON.parse(localStorage.getItem('arena-state')) || JSON.parse(JSON.stringify(DEFAULT_DATA));
+let currentEvent = localStorage.getItem('arena-event') || 'promptverse';
+let adminOpen = false;
+
+function save(){
+  localStorage.setItem('arena-state',JSON.stringify(state));
+  localStorage.setItem('arena-event',currentEvent);
+}
+
+function getParticipants(){
+  return [...state[currentEvent]].sort((a,b)=>b.score-a.score);
+}
+
+function switchEvent(ev, tabEl, fromAdmin){
+  currentEvent = ev;
+  document.querySelectorAll('.switcher-tab').forEach(t=>t.classList.remove('active'));
+  if(tabEl) tabEl.classList.add('active');
+  else{
+    document.querySelectorAll('.switcher-tab').forEach(t=>{
+      if(t.textContent.toLowerCase().replace(' ','')===ev.replace('_','')) t.classList.add('active');
+    });
+  }
+  document.querySelectorAll('.admin-event-btn').forEach(b=>b.classList.remove('active'));
+  const adminEvBtn = document.getElementById('ev-btn-'+ev);
+  if(adminEvBtn) adminEvBtn.classList.add('active');
+  save();
+  renderAll();
+}
+
+function renderPodium(){
+  const p = getParticipants();
+  const stage = document.getElementById('podium-stage');
+  const bgText = document.getElementById('podium-bg-text');
+  bgText.textContent = currentEvent === 'promptverse' ? 'PROMPTVERSE' : 'BLIND CODING';
+
+  const top3 = p.slice(0,3);
+  const order = top3.length >= 3 ? [top3[1],top3[0],top3[2]] : top3;
+  const rankClass = top3.length >= 3 ? ['rank-2','rank-1','rank-3'] : ['rank-1'];
+  const rankNums = top3.length >= 3 ? [2,1,3] : [1];
+
+  stage.innerHTML = order.map((person,i)=>{
+    const rn = rankNums[i] || (i+1);
+    const rc = rankClass[i] || `rank-${i+1}`;
+    return `
+    <div class="podium-card ${rc}" style="animation-delay:${i*0.15}s">
+      <div class="podium-avatar">
+        ${person.initials}
+        <span class="podium-rank-badge">${rn}</span>
+      </div>
+      <div class="podium-name">${person.name.split(' ')[0].toUpperCase()}</div>
+      <div class="podium-score">${person.score} PTS</div>
+      <div class="podium-plinth">${rn}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderLeaderboard(){
+  const p = getParticipants();
+  const max = p[0]?.score || 1;
+  const list = document.getElementById('lb-list');
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = q ? p.filter(x=>x.name.toLowerCase().includes(q)) : p;
+
+  document.getElementById('empty-state').style.display = filtered.length ? 'none' : 'block';
+
+  list.innerHTML = filtered.map((person,i)=>{
+    const globalRank = p.indexOf(person) + 1;
+    const pct = Math.round((person.score/max)*100);
+    return `
+    <div class="lb-row" style="animation:fadeUp 0.4s ${i*0.05}s ease both">
+      <div class="lb-rank-num">${String(globalRank).padStart(2,'0')}</div>
+      <div class="lb-avatar">${person.initials}</div>
+      <div class="lb-info">
+        <div class="lb-name">${person.name}</div>
+        <div class="lb-meta">${currentEvent === 'promptverse' ? 'PROMPTVERSE' : 'BLIND CODING'} &middot; PARTICIPANT</div>
+      </div>
+      <div class="lb-bar-wrap"><div class="lb-bar" style="width:${pct}%"></div></div>
+      <div>
+        <div class="lb-score">${person.score}</div>
+        <div class="lb-score-label">POINTS</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAdminSelect(){
+  const sel = document.getElementById('admin-select');
+  const p = getParticipants();
+  sel.innerHTML = p.map(x=>`<option value="${x.id}">${x.name} (${x.score})</option>`).join('');
+  updateAdminScoreDisplay();
+}
+
+function updateAdminScoreDisplay(){
+  const sel = document.getElementById('admin-select');
+  const p = state[currentEvent].find(x=>x.id==sel.value);
+  document.getElementById('admin-score-display').textContent = p ? p.score : 0;
+}
+
+function changeScore(delta){
+  const sel = document.getElementById('admin-select');
+  const p = state[currentEvent].find(x=>x.id==sel.value);
+  if(!p) return;
+  p.score = Math.max(0, p.score + delta);
+  save();
+  renderAll();
+}
+
+function addParticipant(){
+  const name = prompt('Enter participant name:');
+  if(!name || !name.trim()) return;
+  const initials = name.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  const newId = Date.now();
+  state[currentEvent].push({id:newId,name:name.trim(),initials,score:0});
+  save();
+  renderAll();
+}
+
+function filterList(){renderLeaderboard()}
+
+function toggleAdmin(){
+  adminOpen = !adminOpen;
+  document.getElementById('admin-drawer').classList.toggle('open',adminOpen);
+  if(adminOpen) renderAdminSelect();
+}
+
+document.getElementById('admin-select')?.addEventListener('change', updateAdminScoreDisplay);
+
+function renderAll(){
+  renderPodium();
+  renderLeaderboard();
+  if(adminOpen) renderAdminSelect();
+}
+
+// Init
+renderAll();
+
+// Navbar scroll effect
+window.addEventListener('scroll',()=>{
+  const nav = document.getElementById('navbar');
+  nav.style.boxShadow = window.scrollY > 40 ? '0 0 40px rgba(0,0,0,0.5)' : 'none';
+});
+
+// Sync admin select on change
+document.addEventListener('change',e=>{
+  if(e.target.id==='admin-select') updateAdminScoreDisplay();
+});
+</script>
+</body>
+</html>
