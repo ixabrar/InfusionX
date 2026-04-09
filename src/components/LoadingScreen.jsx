@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 export default function LoadingScreen({ onComplete }) {
-  const fullText = 'ARENA LOADING'
+  const fullText = 'SHH !'
   const [displayedText, setDisplayedText] = useState('')
   const [isComplete, setIsComplete] = useState(false)
 

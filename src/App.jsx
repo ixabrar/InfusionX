@@ -1,51 +1,100 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import LoadingScreen from './components/LoadingScreen'
 import HomePage from './pages/HomePage'
 import AdminPage from './pages/AdminPage'
+import AdminLogin from './components/AdminLogin'
+import {
+  getParticipants,
+  subscribeToParticipants,
+  addParticipant as fbAddParticipant,
+  updateScore as fbUpdateScore,
+  resetAllPoints as fbResetAllPoints,
+  initializeEvent,
+} from './services/firebaseService'
 
 const DEFAULT_DATA = {
-  promptverse: [
-    { id: 1, name: 'Aditya Sharma', initials: 'AS', score: 980 },
-    { id: 2, name: 'Priya Nair', initials: 'PN', score: 870 },
-    { id: 3, name: 'Rohan Mehta', initials: 'RM', score: 810 },
-    { id: 4, name: 'Sneha Patel', initials: 'SP', score: 740 },
-    { id: 5, name: 'Kiran Rao', initials: 'KR', score: 690 },
-    { id: 6, name: 'Divya Iyer', initials: 'DI', score: 640 },
-    { id: 7, name: 'Arjun Verma', initials: 'AV', score: 580 },
-    { id: 8, name: 'Meera Singh', initials: 'MS', score: 520 },
-  ],
-  blindcoding: [
-    { id: 1, name: 'Varun Das', initials: 'VD', score: 950 },
-    { id: 2, name: 'Ananya Kumar', initials: 'AK', score: 900 },
-    { id: 3, name: 'Siddharth Joshi', initials: 'SJ', score: 840 },
-    { id: 4, name: 'Tanvi Bhatt', initials: 'TB', score: 760 },
-    { id: 5, name: 'Ravi Pillai', initials: 'RP', score: 710 },
-    { id: 6, name: 'Nisha Reddy', initials: 'NR', score: 660 },
-    { id: 7, name: 'Gautam Chopra', initials: 'GC', score: 600 },
-    { id: 8, name: 'Pooja Menon', initials: 'PM', score: 545 },
-  ],
+  promptverse: [],
+  blindcoding: [],
 }
 
 function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [state, setState] = useState(() => {
     const saved = localStorage.getItem('arena-state')
-    return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_DATA))
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch (e) {
+        console.error('Failed to parse saved state:', e)
+        return { promptverse: [], blindcoding: [] }
+      }
+    }
+    return { promptverse: [], blindcoding: [] }
   })
-  
+
   const [currentEvent, setCurrentEvent] = useState(() => {
     return localStorage.getItem('arena-event') || 'promptverse'
   })
-  
+
   const [adminDashboardOpen, setAdminDashboardOpen] = useState(false)
   const [scrollY, setScrollY] = useState(0)
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
+    return localStorage.getItem('admin-auth') === 'true'
+  })
 
-  // Persist state to localStorage
+  // Monitor localStorage changes and sync auth state
   useEffect(() => {
-    localStorage.setItem('arena-state', JSON.stringify(state))
-    localStorage.setItem('arena-event', currentEvent)
-  }, [state, currentEvent])
+    const handleStorageChange = () => {
+      setIsAdminAuthenticated(localStorage.getItem('admin-auth') === 'true')
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [])
+
+  // Session timeout - logout after 30 minutes of inactivity
+  useEffect(() => {
+    if (!isAdminAuthenticated) return
+
+    let timeout
+    const resetTimer = () => {
+      clearTimeout(timeout)
+      timeout = setTimeout(() => {
+        localStorage.removeItem('admin-auth')
+        localStorage.removeItem('admin-login-time')
+        setIsAdminAuthenticated(false)
+      }, 30 * 60 * 1000) // 30 minutes
+    }
+
+    // Set initial timeout
+    resetTimer()
+
+    // Reset timeout on user activity
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart']
+    events.forEach(event => window.addEventListener(event, resetTimer))
+
+    return () => {
+      clearTimeout(timeout)
+      events.forEach(event => window.removeEventListener(event, resetTimer))
+    }
+  }, [isAdminAuthenticated])
+
+  // Subscribe to Firebase updates for current event
+  useEffect(() => {
+    setIsLoading(true)
+    const unsubscribe = subscribeToParticipants(currentEvent, (participants) => {
+      setState(prev => ({
+        ...prev,
+        [currentEvent]: participants
+      }))
+      setIsLoading(false)
+    })
+
+    return () => unsubscribe && unsubscribe()
+  }, [currentEvent])
+
+  // Persist state to localStorage as backup
 
   // Track scroll position
   useEffect(() => {
@@ -64,37 +113,31 @@ function App() {
   }
 
   const updateScore = (participantId, delta) => {
-    setState(prev => ({
-      ...prev,
-      [currentEvent]: prev[currentEvent].map(p =>
-        p.id === participantId
-          ? { ...p, score: Math.max(0, p.score + delta) }
-          : p
-      ),
-    }))
+    const participant = state[currentEvent].find(p => p.id === participantId)
+    if (participant) {
+      const newScore = Math.max(0, participant.score + delta)
+      fbUpdateScore(currentEvent, participantId, newScore).catch(error => {
+        console.error('Error updating score:', error)
+      })
+    }
   }
 
   const addParticipant = (name) => {
-    const initials = name
-      .trim()
-      .split(' ')
-      .map(w => w[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
-    
-    setState(prev => ({
-      ...prev,
-      [currentEvent]: [
-        ...prev[currentEvent],
-        {
-          id: Date.now(),
-          name: name.trim(),
-          initials,
-          score: 0,
-        },
-      ],
-    }))
+    fbAddParticipant(currentEvent, name).catch(error => {
+      console.error('Error adding participant:', error)
+    })
+  }
+
+  const resetAllPoints = () => {
+    fbResetAllPoints(currentEvent).catch(error => {
+      console.error('Error resetting points:', error)
+    })
+  }
+
+  const clearAllParticipants = () => {
+    // This would require a function to delete all participants
+    // For now, just reset all points
+    resetAllPoints()
   }
 
   const participants = getParticipants()
@@ -109,9 +152,29 @@ function App() {
         <Route 
           path="/" 
           element={
+            <Navigate to="/promptverse" replace />
+          } 
+        />
+        <Route 
+          path="/promptverse" 
+          element={
             <HomePage 
-              participants={participants}
-              currentEvent={currentEvent}
+              participants={state.promptverse}
+              currentEvent="promptverse"
+              onSwitchEvent={switchEvent}
+              onUpdateScore={updateScore}
+              onAddParticipant={addParticipant}
+              state={state}
+              scrollY={scrollY}
+            />
+          } 
+        />
+        <Route 
+          path="/blindcoding" 
+          element={
+            <HomePage 
+              participants={state.blindcoding}
+              currentEvent="blindcoding"
               onSwitchEvent={switchEvent}
               onUpdateScore={updateScore}
               onAddParticipant={addParticipant}
@@ -123,14 +186,37 @@ function App() {
         <Route 
           path="/admin" 
           element={
-            <AdminPage 
-              state={state}
-              setState={setState}
-              currentEvent={currentEvent}
-              onEventSwitch={switchEvent}
-              onUpdateScore={updateScore}
-              onAddParticipant={addParticipant}
-            />
+            isAdminAuthenticated ? (
+              <AdminPage 
+                state={state}
+                setState={setState}
+                currentEvent={currentEvent}
+                onEventSwitch={switchEvent}
+                onUpdateScore={updateScore}
+                onAddParticipant={addParticipant}
+                onResetPoints={resetAllPoints}
+                onClearAllParticipants={clearAllParticipants}
+              />
+            ) : (
+              <>
+                <AdminLogin 
+                  onLoginSuccess={() => setIsAdminAuthenticated(true)}
+                />
+                {/* Render admin page behind login */}
+                <div style={{ visibility: 'hidden', position: 'absolute' }}>
+                  <AdminPage 
+                    state={state}
+                    setState={setState}
+                    currentEvent={currentEvent}
+                    onEventSwitch={switchEvent}
+                    onUpdateScore={updateScore}
+                    onAddParticipant={addParticipant}
+                    onResetPoints={resetAllPoints}
+                    onClearAllParticipants={clearAllParticipants}
+                  />
+                </div>
+              </>
+            )
           } 
         />
       </Routes>

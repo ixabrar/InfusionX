@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import AdminLogout from '../components/AdminLogout'
+import InitializeDatabase from '../components/InitializeDatabase'
 
 export default function AdminPage({
   state,
@@ -9,13 +11,28 @@ export default function AdminPage({
   onEventSwitch,
   onUpdateScore,
   onAddParticipant,
+  onResetPoints,
+  onClearAllParticipants,
 }) {
   const [newName, setNewName] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [scoreInput, setScoreInput] = useState('')
   const [filterSearch, setFilterSearch] = useState('')
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
 
   const allParticipants = state[currentEvent]
+  
+  // Show initialization only after user is logged in
+  if (!allParticipants || allParticipants.length === 0) {
+    return (
+      <>
+        <AdminLogout />
+        <InitializeDatabase />
+      </>
+    )
+  }
+
   const participants = [...allParticipants].sort((a, b) => b.score - a.score)
   const filtered = participants.filter(p =>
     p.name.toLowerCase().includes(filterSearch.toLowerCase())
@@ -46,6 +63,7 @@ export default function AdminPage({
 
   return (
     <div className="min-h-screen" style={{ background: '#080C10', color: '#F0F4F8' }}>
+      <AdminLogout />
       {/* Header */}
       <header
         className="sticky top-0 z-50 border-b px-10 py-5"
@@ -293,6 +311,93 @@ export default function AdminPage({
                 >
                   + ADD PARTICIPANT
                 </button>
+              </div>
+            </motion.div>
+
+            {/* Reset Points Section */}
+            <motion.div
+              className="rounded-lg p-6 border"
+              style={{
+                background: 'rgba(13,19,24,0.5)',
+                borderColor: 'rgba(239,68,68,0.3)',
+              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+            >
+              <div className="font-mono text-xs tracking-[0.2em] text-red-500 uppercase mb-4">
+                ⚠ RESET POINTS
+              </div>
+              <div className="space-y-3">
+                {!showResetConfirm ? (
+                  <button
+                    onClick={() => setShowResetConfirm(true)}
+                    className="font-mono text-xs tracking-[0.1em] py-3 px-4 rounded transition-all w-full font-bold"
+                    style={{
+                      background: 'rgba(239,68,68,0.15)',
+                      border: '1px solid rgba(239,68,68,0.3)',
+                      color: '#ef4444',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(239,68,68,0.25)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(239,68,68,0.15)'
+                    }}
+                  >
+                    RESET ALL POINTS
+                  </button>
+                ) : (
+                  <motion.div
+                    className="space-y-2"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <p className="font-mono text-xs text-red-400">
+                      Reset all points to 0 for {currentEvent === 'promptverse' ? 'PROMPTVERSE' : 'BLIND CODING'}?
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => {
+                          onResetPoints()
+                          setShowResetConfirm(false)
+                        }}
+                        className="font-mono text-xs tracking-[0.1em] py-2 px-4 rounded transition-all font-bold"
+                        style={{
+                          background: 'rgba(239,68,68,0.25)',
+                          border: '1px solid #ef4444',
+                          color: '#ef4444',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(239,68,68,0.4)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(239,68,68,0.25)'
+                        }}
+                      >
+                        YES, RESET ALL
+                      </button>
+                      <button
+                        onClick={() => setShowResetConfirm(false)}
+                        className="font-mono text-xs tracking-[0.1em] py-2 px-4 rounded transition-all font-bold"
+                        style={{
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          color: '#6B7280',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+                        }}
+                      >
+                        CANCEL
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
               </div>
             </motion.div>
           </div>

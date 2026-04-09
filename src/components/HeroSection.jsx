@@ -5,7 +5,7 @@ export default function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-0"
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-x-hidden pt-0 px-4"
       style={{ background: '#080C10' }}
     >
       {/* Grid Overlay */}
@@ -81,15 +81,15 @@ export default function HeroSection() {
       </motion.p>
 
       <motion.div
-        className="mt-12 flex gap-4 flex-wrap justify-center"
+        className="mt-8 sm:mt-10 md:mt-12 flex gap-2 sm:gap-3 md:gap-4 flex-wrap justify-center px-4"
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: 'easeOut', delay: 0.45 }}
       >
-        <a href="#podium-section" className="btn-primary">
+        <a href="#podium-section" className="btn-primary text-xs sm:text-sm md:text-base px-4 sm:px-6 md:px-10 py-2 sm:py-3 md:py-[14px]">
           ENTER ARENA
         </a>
-        <a href="#leaderboard-section" className="btn-ghost">
+        <a href="#leaderboard-section" className="btn-ghost text-xs sm:text-sm md:text-base px-4 sm:px-6 md:px-10 py-2 sm:py-3 md:py-[14px]">
           VIEW RANKINGS
         </a>
       </motion.div>

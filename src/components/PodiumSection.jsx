@@ -26,7 +26,7 @@ export default function PodiumSection({ participants, currentEvent }) {
   return (
     <div
       id="podium-section"
-      className="relative overflow-hidden px-10 py-[120px]"
+      className="relative overflow-hidden px-4 sm:px-6 md:px-10 py-16 sm:py-20 md:py-[120px]"
       style={{ background: '#080C10' }}
     >
       {/* Background gradient */}
@@ -60,7 +60,7 @@ export default function PodiumSection({ participants, currentEvent }) {
         </div>
 
         {/* Podium Stage */}
-        <div className="flex items-end justify-center gap-6 flex-wrap md:flex-nowrap md:gap-4">
+        <div className="flex items-end justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 flex-wrap md:flex-nowrap">
           {displayOrder.map((person, i) => (
             <PodiumCard
               key={person.id}
