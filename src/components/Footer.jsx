@@ -5,15 +5,15 @@ export default function Footer() {
 
   return (
     <footer
-      className="mt-12 sm:mt-16 md:mt-20 border-t"
+      className="mt-20 border-t"
       style={{
         background: '#080C10',
         borderColor: 'rgba(0,255,135,0.15)',
       }}
     >
       {/* Main Footer Content */}
-      <div className="px-4 sm:px-6 md:px-10 py-12 sm:py-14 md:py-16 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 md:gap-12">
+      <div className="px-10 py-16 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand Section */}
           <div className="space-y-4">
             <Link to="/">
@@ -128,12 +128,12 @@ export default function Footer() {
       <div style={{ borderTop: '1px solid rgba(0,255,135,0.15)' }} />
 
       {/* Bottom Bar */}
-      <div className="px-4 sm:px-6 md:px-10 py-6 sm:py-7 md:py-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-          <p className="font-mono text-xs tracking-[0.1em] order-2 md:order-1 w-full md:w-auto" style={{ color: 'rgba(255,255,255,0.4)' }}>
+      <div className="px-10 py-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="font-mono text-xs tracking-[0.1em] text-center md:text-left" style={{ color: 'rgba(255,255,255,0.4)' }}>
             ARENA © {currentYear} &mdash; AIDS Department &mdash; Built for Champions
           </p>
-          <div className="flex items-center gap-4 sm:gap-6 order-1 md:order-2">
+          <div className="flex items-center gap-6">
             <a 
               href="https://twitter.com" 
               target="_blank" 

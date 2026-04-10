@@ -1,15 +1,12 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-export default function AdminLogout({ onLogout }) {
+export default function AdminLogout() {
   const navigate = useNavigate()
 
   const handleLogout = () => {
     localStorage.removeItem('admin-auth')
     localStorage.removeItem('admin-login-time')
-    // Dispatch storage event for other components to sync
-    window.dispatchEvent(new Event('storage'))
-    if (onLogout) onLogout()
     navigate('/')
   }
 

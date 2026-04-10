@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 
-const ADMIN_PASSWORD = 'admin123' // Change this to your desired password
+const ADMIN_PASSWORD = 'admin6969' // Change this to your desired password
 
 export default function AdminLogin({ onLoginSuccess }) {
   const [password, setPassword] = useState('')

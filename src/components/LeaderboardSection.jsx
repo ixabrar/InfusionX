@@ -18,7 +18,7 @@ export default function LeaderboardSection({ participants, currentEvent }) {
   return (
     <div
       id="leaderboard-section"
-      className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-10 py-12 sm:py-16 md:py-20"
+      className="max-w-[1200px] mx-auto px-10 py-20"
       style={{ background: '#080C10' }}
     >
       {/* Header */}

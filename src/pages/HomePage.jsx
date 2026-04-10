@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Header from '../components/Header'
 import HeroSection from '../components/HeroSection'
 import EventSwitcher from '../components/EventSwitcher'
 import PodiumSection from '../components/PodiumSection'
 import LeaderboardSection from '../components/LeaderboardSection'
+import DualLeaderboardSection from '../components/DualLeaderboardSection'
 import AdminButton from '../components/AdminButton'
 import Footer from '../components/Footer'
 
 export default function HomePage({
   participants,
   currentEvent,
+  onSwitchEvent,
   state,
 }) {
   const [scrollY, setScrollY] = useState(0)
-  const navigate = useNavigate()
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY)
@@ -23,18 +23,15 @@ export default function HomePage({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const handleSwitchEvent = (event) => {
-    navigate(`/${event}`)
-  }
-
   return (
     <div className="bg-bg text-text font-body">
       <Navbar scrollY={scrollY} />
       <Header />
       <HeroSection />
-      <EventSwitcher currentEvent={currentEvent} onSwitchEvent={handleSwitchEvent} />
+      <EventSwitcher currentEvent={currentEvent} onSwitchEvent={onSwitchEvent} />
       <PodiumSection participants={participants} currentEvent={currentEvent} />
       <LeaderboardSection participants={participants} currentEvent={currentEvent} />
+      <DualLeaderboardSection state={state} />
       <AdminButton />
       <Footer />
     </div>

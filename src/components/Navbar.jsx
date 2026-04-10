@@ -15,19 +15,19 @@ export default function Navbar({ scrollY }) {
       }}
     >
       {/* Top Bar - Simple Navigation */}
-      <div className="flex items-center justify-between px-4 sm:px-6 md:px-10 py-3 md:py-4 border-b" style={{ borderColor: 'rgba(0,255,135,0.15)' }}>
+      <div className="flex items-center justify-between px-10 py-4 border-b" style={{ borderColor: 'rgba(0,255,135,0.15)' }}>
         {/* Left Side - Empty Space */}
         <div></div>
 
         {/* Right Side - Admin & Branding */}
-        <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+        <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center gap-2 font-mono text-xs tracking-[0.1em]" style={{ color: '#6B7280' }}>
             <span>INFUSION</span>
             <span style={{ color: '#00FF87' }}>X</span>
           </div>
           <Link to="/admin">
             <button
-              className="font-mono text-xs tracking-[0.15em] px-3 sm:px-4 py-2 rounded transition-all text-xs sm:text-sm"
+              className="font-mono text-xs tracking-[0.15em] px-4 py-2 rounded transition-all"
               style={{
                 border: '1px solid rgba(0,255,135,0.3)',
                 background: 'rgba(0,255,135,0.12)',

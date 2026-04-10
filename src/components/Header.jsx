@@ -25,7 +25,7 @@ export default function Header() {
     >
       <div className="max-w-7xl mx-auto px-10">
         {/* Main Badge Container - Left Aligned */}
-        <div className="space-y-5 w-fit -ml-px md:-ml-[75px]">
+        <div className="space-y-5 w-fit ml-[-75px]">
           {/* Title */}
           <motion.div
             className="relative"

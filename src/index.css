@@ -67,8 +67,8 @@ body {
 
 /* PODIUM PLINTH STYLING */
 .podium-plinth-rank1 {
-  width: clamp(120px, 20vw, 180px);
-  height: clamp(80px, 13vw, 120px);
+  width: 180px;
+  height: 120px;
   background: linear-gradient(to top, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
   border: 1px solid rgba(255, 215, 0, 0.25);
   display: flex;
@@ -76,14 +76,14 @@ body {
   justify-content: center;
   font-family: 'Bebas Neue', sans-serif;
   letter-spacing: 0.1em;
-  font-size: clamp(32px, 6vw, 48px);
+  font-size: 48px;
   color: #FFD700;
   border-radius: 6px 6px 0 0;
 }
 
 .podium-plinth-rank2 {
-  width: clamp(100px, 17vw, 150px);
-  height: clamp(60px, 11vw, 80px);
+  width: 150px;
+  height: 80px;
   background: linear-gradient(to top, rgba(192, 192, 192, 0.1), rgba(192, 192, 192, 0.03));
   border: 1px solid rgba(192, 192, 192, 0.2);
   display: flex;
@@ -91,14 +91,14 @@ body {
   justify-content: center;
   font-family: 'Bebas Neue', sans-serif;
   letter-spacing: 0.1em;
-  font-size: clamp(28px, 5vw, 40px);
+  font-size: 40px;
   color: #C0C0C0;
   border-radius: 6px 6px 0 0;
 }
 
 .podium-plinth-rank3 {
-  width: clamp(90px, 16vw, 140px);
-  height: clamp(50px, 9vw, 60px);
+  width: 140px;
+  height: 60px;
   background: linear-gradient(to top, rgba(205, 127, 50, 0.1), rgba(205, 127, 50, 0.03));
   border: 1px solid rgba(205, 127, 50, 0.2);
   display: flex;
@@ -106,55 +106,55 @@ body {
   justify-content: center;
   font-family: 'Bebas Neue', sans-serif;
   letter-spacing: 0.1em;
-  font-size: clamp(24px, 4.5vw, 36px);
+  font-size: 36px;
   color: #CD7F32;
   border-radius: 6px 6px 0 0;
 }
 
 /* AVATAR STYLING */
 .avatar-rank1 {
-  width: clamp(70px, 12vw, 100px);
-  height: clamp(70px, 12vw, 100px);
+  width: 100px;
+  height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(24px, 4vw, 36px);
+  font-size: 36px;
   position: relative;
-  margin-bottom: clamp(12px, 2vw, 16px);
+  margin-bottom: 16px;
   background: radial-gradient(circle, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.05));
   border: 2px solid #FFD700;
   box-shadow: 0 0 40px rgba(255, 215, 0, 0.3), 0 0 80px rgba(255, 215, 0, 0.1);
 }
 
 .avatar-rank2 {
-  width: clamp(60px, 10vw, 80px);
-  height: clamp(60px, 10vw, 80px);
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(20px, 3.5vw, 28px);
+  font-size: 28px;
   position: relative;
-  margin-bottom: clamp(12px, 2vw, 16px);
+  margin-bottom: 16px;
   background: radial-gradient(circle, rgba(192, 192, 192, 0.2), rgba(192, 192, 192, 0.05));
   border: 2px solid #C0C0C0;
   box-shadow: 0 0 30px rgba(192, 192, 192, 0.2);
 }
 
 .avatar-rank3 {
-  width: clamp(60px, 10vw, 80px);
-  height: clamp(60px, 10vw, 80px);
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(20px, 3.5vw, 28px);
+  font-size: 28px;
   position: relative;
-  margin-bottom: clamp(12px, 2vw, 16px);
+  margin-bottom: 16px;
   background: radial-gradient(circle, rgba(205, 127, 50, 0.2), rgba(205, 127, 50, 0.05));
   border: 2px solid #CD7F32;
   box-shadow: 0 0 30px rgba(205, 127, 50, 0.2);
@@ -220,215 +220,4 @@ body {
 .btn-ghost:hover {
   border-color: rgba(255, 255, 255, 0.3);
   color: #F0F4F8;
-}
-
-/* RESPONSIVE STYLES */
-/* Mobile: Extra Small (0px - 480px) */
-@media (max-width: 480px) {
-  body {
-    font-size: 14px;
-  }
-
-  .grid-overlay {
-    background-size: 40px 40px;
-  }
-
-  .btn-primary,
-  .btn-ghost {
-    font-size: 11px;
-    padding: 10px 20px;
-    letter-spacing: 0.15em;
-  }
-
-  /* Reduce padding on sections */
-  [class*="px-10"] {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  /* Podium section padding */
-  #podium-section {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    padding-top: 60px !important;
-    padding-bottom: 60px !important;
-  }
-
-  /* Leaderboard section padding */
-  #leaderboard-section {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    padding-top: 40px !important;
-    padding-bottom: 40px !important;
-  }
-
-  /* Event switcher padding */
-  #events {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-  }
-
-  /* Prevent horizontal scroll on small screens */
-  #podium-section,
-  #leaderboard-section,
-  #events {
-    overflow-x: hidden;
-  }
-}
-
-/* Mobile: Small (481px - 768px) */
-@media (max-width: 768px) {
-  /* Ensure flex wrapping on podium */
-  .flex.items-end.justify-center.gap-6 {
-    gap: clamp(0.75rem, 2vw, 1.5rem);
-    padding: 0 clamp(0.5rem, 1vw, 1rem);
-  }
-
-  /* Adjust podium gap for tablets */
-  .flex.items-end.justify-center {
-    gap: clamp(0.5rem, 1.5vw, 1.5rem);
-  }
-
-  /* LeaderboardRow adjustments */
-  .flex.items-center.gap-5 {
-    gap: clamp(0.75rem, 2vw, 1.25rem);
-    padding-left: clamp(1rem, 2vw, 1.5rem);
-    padding-right: clamp(1rem, 2vw, 1.5rem);
-  }
-
-  .font-hero.text-\[36px\] {
-    font-size: clamp(24px, 5vw, 36px);
-  }
-
-  .font-mono.text-\[20px\] {
-    font-size: clamp(16px, 4vw, 20px);
-  }
-
-  /* Hide progress bar on tablets and smaller */
-  .hidden.md\:flex {
-    display: none !important;
-  }
-}
-
-/* Tablet: Medium (769px - 1024px) */
-@media (max-width: 1024px) {
-  /* Event switcher buttons */
-  button.font-mono.text-xs.tracking-\[0\.2em\].uppercase {
-    padding: 8px 16px;
-    font-size: 11px;
-  }
-
-  /* Header adjustments */
-  [class*="space-y-5"] {
-    gap: clamp(12px, 2vw, 20px);
-  }
-}
-
-/* Large screens and above - maintain desktop look */
-@media (min-width: 1025px) {
-  /* Keep original spacing */
-  [class*="px-10"] {
-    padding-left: 40px;
-    padding-right: 40px;
-  }
-}
-
-/* Ultra-wide screens (1441px+) */
-@media (min-width: 1441px) {
-  /* Ensure max-width containers don't get too wide */
-  .max-w-7xl,
-  .max-w-\[1200px\] {
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-/* Responsive text sizing - ensure no overflow */
-@media (max-width: 640px) {
-  .font-hero {
-    overflow-wrap: break-word;
-    word-break: break-word;
-  }
-
-  /* Header positioning on mobile */
-  .ml-\[-75px\] {
-    margin-left: clamp(-20px, -10vw, -40px) !important;
-  }
-
-  /* Navbar spacing */
-  #navbar {
-    padding: 0;
-  }
-
-  .flex.items-center.justify-between.px-10 {
-    padding-left: 1rem;
-    padding-right: 1rem;
-    padding-top: 12px;
-    padding-bottom: 12px;
-  }
-
-  /* Button sizes on mobile */
-  .font-mono.text-xs.tracking-\[0\.15em\].px-4 {
-    padding: 8px 12px;
-    font-size: 10px;
-  }
-
-  /* Search bar width on mobile */
-  .w-\[280px\] {
-    width: 100% !important;
-    max-width: 280px;
-  }
-
-  input.font-mono.text-\[13px\] {
-    width: 100% !important;
-  }
-}
-
-/* Ensure containers are never too constrained */
-@media (max-width: 500px) {
-  .relative.max-w-\[1200px\].mx-auto {
-    width: calc(100% - 2rem);
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .max-w-\[1200px\].mx-auto {
-    width: calc(100% - 2rem);
-  }
-}
-
-/* Landscape mode adjustments */
-@media (max-height: 600px) and (orientation: landscape) {
-  #hero {
-    min-height: auto;
-    padding: 40px 0;
-  }
-
-  [class*="py-\[120px\]"] {
-    padding-top: 60px !important;
-    padding-bottom: 60px !important;
-  }
-}
-
-/* Print styles to prevent overflow */
-@media print {
-  body {
-    overflow-x: visible;
-  }
-}
-
-/* Prevent horizontal scroll across all screen sizes */
-html,
-body {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100%;
-}
-
-main,
-section,
-article {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100%;
 }

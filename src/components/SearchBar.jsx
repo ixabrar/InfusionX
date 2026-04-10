@@ -1,6 +1,6 @@
 export default function SearchBar({ value, onChange }) {
   return (
-    <div className="relative w-full sm:w-[200px] md:w-[280px]">
+    <div className="relative">
       <span className="absolute left-[14px] top-1/2 -translate-y-1/2 text-muted text-[15px] pointer-events-none font-mono">
         ⌕
       </span>
@@ -9,7 +9,7 @@ export default function SearchBar({ value, onChange }) {
         placeholder="Search combatant..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="font-mono text-[13px] tracking-[0.1em] pl-11 pr-5 py-3 rounded outline-none transition-all w-full"
+        className="font-mono text-[13px] tracking-[0.1em] pl-11 pr-5 py-3 rounded outline-none transition-all w-[280px] sm:w-[200px]"
         style={{
           background: 'rgba(255,255,255,0.03)',
           border: '1px solid rgba(255,255,255,0.07)',

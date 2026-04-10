@@ -11,7 +11,7 @@ export default function AdminDashboard({
   onAddParticipant,
   allParticipants,
   state,
-  onResetPoints,
+  setState,
 }) {
   const [newName, setNewName] = useState('')
   const [editingId, setEditingId] = useState(null)
@@ -39,6 +39,17 @@ export default function AdminDashboard({
     }
     setEditingId(null)
     setScoreInput('')
+  }
+
+  const handleResetAllPoints = () => {
+    setState(prev => ({
+      ...prev,
+      [currentEvent]: prev[currentEvent].map(p => ({
+        ...p,
+        score: 0,
+      })),
+    }))
+    setShowResetConfirm(false)
   }
 
   return (
@@ -181,6 +192,30 @@ export default function AdminDashboard({
                     + ADD
                   </button>
                 </div>
+              </div>
+
+              {/* Reset All Points */}
+              <div className="bg-bg-2/50 border border-red-600/20 rounded-lg p-4">
+                <div className="font-mono text-xs tracking-[0.2em] text-red-400 uppercase mb-4">
+                  ⚠ RESET ALL POINTS
+                </div>
+                <button
+                  onClick={() => setShowResetConfirm(true)}
+                  className="w-full font-mono text-xs tracking-[0.1em] px-4 py-2 rounded transition-all font-bold"
+                  style={{
+                    background: 'rgba(255,68,68,0.15)',
+                    border: '1px solid #ff6b6b',
+                    color: '#ff6b6b',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'rgba(255,68,68,0.25)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'rgba(255,68,68,0.15)'
+                  }}
+                >
+                  🔄 RESET ALL POINTS
+                </button>
               </div>
 
               {/* Participants Table */}
@@ -348,91 +383,92 @@ export default function AdminDashboard({
                   </div>
                 </div>
               </div>
-
-              {/* Reset Points Section */}
-              <div className="bg-bg-2/50 border border-red-500/20 rounded-lg p-4">
-                <div className="font-mono text-xs tracking-[0.2em] text-red-500 uppercase mb-4">
-                  ⚠ DANGER ZONE
-                </div>
-                <div className="space-y-3">
-                  <p className="font-mono text-xs text-muted leading-relaxed">
-                    Reset all participant points to zero for {currentEvent === 'promptverse' ? 'PROMPTVERSE' : 'BLIND CODING'}.This action cannot be undone.
-                  </p>
-                  {!showResetConfirm ? (
-                    <button
-                      onClick={() => setShowResetConfirm(true)}
-                      className="w-full font-mono text-xs tracking-[0.1em] py-2 px-4 rounded transition-all"
-                      style={{
-                        background: 'rgba(239,68,68,0.15)',
-                        border: '1px solid rgba(239,68,68,0.3)',
-                        color: '#ef4444',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(239,68,68,0.25)'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'rgba(239,68,68,0.15)'
-                      }}
-                    >
-                      RESET ALL POINTS
-                    </button>
-                  ) : (
-                    <motion.div
-                      className="space-y-2"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                    >
-                      <p className="font-mono text-xs text-red-400">
-                        Are you sure? This will reset all points to 0.
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => {
-                            onResetPoints()
-                            setShowResetConfirm(false)
-                          }}
-                          className="flex-1 font-mono text-xs tracking-[0.1em] py-2 px-4 rounded transition-all"
-                          style={{
-                            background: 'rgba(239,68,68,0.25)',
-                            border: '1px solid #ef4444',
-                            color: '#ef4444',
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(239,68,68,0.4)'
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(239,68,68,0.25)'
-                          }}
-                        >
-                          YES, RESET
-                        </button>
-                        <button
-                          onClick={() => setShowResetConfirm(false)}
-                          className="flex-1 font-mono text-xs tracking-[0.1em] py-2 px-4 rounded transition-all"
-                          style={{
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            color: '#6B7280',
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
-                          }}
-                        >
-                          CANCEL
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-              </div>
             </div>
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+
+      {/* Reset Confirmation Modal */}
+      <AnimatePresence>
+        {showResetConfirm && (
+          <motion.div
+            className="fixed inset-0 z-510 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Backdrop */}
+            <motion.div
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              onClick={() => setShowResetConfirm(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            ></motion.div>
+
+            {/* Modal */}
+            <motion.div
+              className="relative bg-bg-1 border rounded-lg p-8 max-w-md w-full mx-4"
+              style={{
+                borderColor: 'rgba(255,68,68,0.3)',
+                background: 'rgba(8,12,16,0.95)',
+              }}
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <h3 className="font-hero text-2xl tracking-[0.1em] text-red-400 uppercase mb-2">
+                ⚠ WARNING
+              </h3>
+              <p className="font-mono text-xs text-muted mb-6">
+                Are you sure you want to reset all points to zero for{' '}
+                <span className="text-accent font-bold">
+                  {currentEvent === 'promptverse' ? 'PROMPTVERSE' : 'BLIND CODING'}
+                </span>
+                ? This cannot be undone.
+              </p>
+
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  className="flex-1 font-mono text-xs tracking-[0.1em] py-2 px-4 rounded transition-all font-bold"
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: '#6B7280',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'rgba(255,255,255,0.08)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'rgba(255,255,255,0.05)'
+                  }}
+                >
+                  ✕ CANCEL
+                </button>
+                <button
+                  onClick={handleResetAllPoints}
+                  className="flex-1 font-mono text-xs tracking-[0.1em] py-2 px-4 rounded transition-all font-bold"
+                  style={{
+                    background: 'rgba(255,68,68,0.15)',
+                    border: '1px solid #ff6b6b',
+                    color: '#ff6b6b',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'rgba(255,68,68,0.25)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'rgba(255,68,68,0.15)'
+                  }}
+                >
+                  ✓ RESET ALL
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
   )
 }
