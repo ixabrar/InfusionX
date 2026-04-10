@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import DataSyncMonitor from './DataSyncMonitor'
 
 export default function AdminDashboard({
   isOpen,
@@ -11,10 +12,14 @@ export default function AdminDashboard({
   onAddParticipant,
   allParticipants,
   state,
+  onResetPoints,
+  onRemoveParticipant,
 }) {
   const [newName, setNewName] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [scoreInput, setScoreInput] = useState('')
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null)
 
   const handleAddParticipant = () => {
     if (newName.trim()) {
@@ -297,6 +302,43 @@ export default function AdminDashboard({
                                   >
                                     +
                                   </button>
+                                  {/* Delete Button */}
+                                  {deleteConfirmId === person.id ? (
+                                    <button
+                                      onClick={() => {
+                                        onRemoveParticipant(person.id)
+                                        setDeleteConfirmId(null)
+                                      }}
+                                      className="w-6 h-6 rounded font-mono text-xs flex items-center justify-center transition-all"
+                                      style={{
+                                        background: 'rgba(255,68,68,0.4)',
+                                        border: '1px solid #ff6b6b',
+                                        color: '#fff',
+                                      }}
+                                      title="Confirm delete"
+                                    >
+                                      ✓
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={() => setDeleteConfirmId(person.id)}
+                                      className="w-6 h-6 rounded font-mono text-xs flex items-center justify-center transition-all"
+                                      style={{
+                                        background: 'rgba(255,68,68,0.15)',
+                                        border: '1px solid rgba(255,68,68,0.4)',
+                                        color: '#ff6b6b',
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.target.style.background = 'rgba(255,68,68,0.25)'
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.target.style.background = 'rgba(255,68,68,0.15)'
+                                      }}
+                                      title="Remove participant"
+                                    >
+                                      ✕
+                                    </button>
+                                  )}
                                 </div>
                               </>
                             )}
@@ -310,6 +352,9 @@ export default function AdminDashboard({
                   )}
                 </div>
               </div>
+
+              {/* Real-Time Data Sync Monitor */}
+              <DataSyncMonitor />
 
               {/* Event Stats */}
               <div className="bg-bg-2/50 border border-accent/20 rounded-lg p-4">
@@ -344,6 +389,87 @@ export default function AdminDashboard({
                       {allParticipants.reduce((sum, p) => sum + p.score, 0)}
                     </span>
                   </div>
+                </div>
+              </div>
+
+              {/* Reset Points Section */}
+              <div className="bg-bg-2/50 border border-red-500/20 rounded-lg p-4">
+                <div className="font-mono text-xs tracking-[0.2em] text-red-500 uppercase mb-4">
+                  ⚠ DANGER ZONE
+                </div>
+                <div className="space-y-3">
+                  <p className="font-mono text-xs text-muted leading-relaxed">
+                    Reset all participant points to zero for {currentEvent === 'promptverse' ? 'PROMPTVERSE' : 'BLIND CODING'}.This action cannot be undone.
+                  </p>
+                  {!showResetConfirm ? (
+                    <button
+                      onClick={() => setShowResetConfirm(true)}
+                      className="w-full font-mono text-xs tracking-[0.1em] py-2 px-4 rounded transition-all"
+                      style={{
+                        background: 'rgba(239,68,68,0.15)',
+                        border: '1px solid rgba(239,68,68,0.3)',
+                        color: '#ef4444',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(239,68,68,0.25)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(239,68,68,0.15)'
+                      }}
+                    >
+                      RESET ALL POINTS
+                    </button>
+                  ) : (
+                    <motion.div
+                      className="space-y-2"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                    >
+                      <p className="font-mono text-xs text-red-400">
+                        Are you sure? This will reset all points to 0.
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            onResetPoints()
+                            setShowResetConfirm(false)
+                          }}
+                          className="flex-1 font-mono text-xs tracking-[0.1em] py-2 px-4 rounded transition-all"
+                          style={{
+                            background: 'rgba(239,68,68,0.25)',
+                            border: '1px solid #ef4444',
+                            color: '#ef4444',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(239,68,68,0.4)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(239,68,68,0.25)'
+                          }}
+                        >
+                          YES, RESET
+                        </button>
+                        <button
+                          onClick={() => setShowResetConfirm(false)}
+                          className="flex-1 font-mono text-xs tracking-[0.1em] py-2 px-4 rounded transition-all"
+                          style={{
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: '#6B7280',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+                          }}
+                        >
+                          CANCEL
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               </div>
             </div>

@@ -60,7 +60,7 @@ export default function PodiumCard({ person, rank, rankClass, delay }) {
       {/* Name */}
       <div
         className={`font-hero tracking-[0.05em] text-center mb-1 ${
-          rankClass === 'rank-1' ? 'text-[28px]' : 'text-[22px]'
+          rankClass === 'rank-1' ? 'text-[clamp(20px,4vw,28px)]' : 'text-[clamp(16px,3.5vw,22px)]'
         }`}
       >
         {person.name.split(' ')[0].toUpperCase()}
@@ -68,10 +68,10 @@ export default function PodiumCard({ person, rank, rankClass, delay }) {
 
       {/* Score */}
       <div
-        className={`font-mono mb-5 ${
+        className={`font-mono mb-4 sm:mb-5 ${
           rankClass === 'rank-1'
-            ? 'text-accent text-[15px]'
-            : 'text-muted text-[13px]'
+            ? 'text-accent text-[clamp(12px,2vw,15px)]'
+            : 'text-muted text-[clamp(11px,1.8vw,13px)]'
         }`}
       >
         {person.score} PTS
